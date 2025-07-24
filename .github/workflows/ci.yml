@@ -108,12 +108,15 @@ jobs:
       
       - name: Generate client config
         run: |
+          # Replace colon ':' with space to split host and port
+          REMOTE="${NGROK_TUNNEL/:/ }"
+          
           CLIENT_CONFIG=/home/runner/openvpn-ca/client1.ovpn
           cat > $CLIENT_CONFIG <<EOF
           client
           dev tun
           proto tcp
-          remote ${{ env.NGROK_TUNNEL//:/ }}
+          remote $REMOTE
           resolv-retry infinite
           nobind
           persist-key
