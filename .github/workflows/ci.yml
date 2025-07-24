@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
+      - name: Show current user
+        run: whoami
       - name: Show IP address info
         run: ip a
       - name: Checkout code
@@ -44,22 +46,10 @@ jobs:
       - name: Set runner password
         run: echo "runner:simple1pass" | sudo chpasswd
 
-      - name: Allow root login with password
+      - name: Allow runner login with password
         run: |
           sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
           sudo sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
-      
-      #- name: Start SSH server
-      # run: sudo /usr/sbin/sshd
-
-      - name: Check sshd status
-        run: ps aux | grep sshd
-
-      - name: Check runner password hash
-        run: sudo grep runner /etc/shadow
-
-      - name: Cat if password was set
-        run: cat /etc/ssh/sshd_config
 
       - name: Configure ngrok authtoken
         run: ngrok config add-authtoken ${{ secrets.NGROK_TOKEN }}
@@ -70,18 +60,8 @@ jobs:
           sleep 5
           curl --silent http://127.0.0.1:4040/api/tunnels | jq '.tunnels[0].public_url'
 
-      - name: Install sshpass
-        run: sudo apt-get install -y sshpass
-
-      - name: Show current user
-        run: whoami
-        
-      - name: Verify root password login via ssh localhost
-        run: |
-          echo "simple1pass" | sshpass ssh -o StrictHostKeyChecking=no runner@localhost 'echo SSH login successful'
-
-      - name: Wait 1 sec to keep tunnel open
-        run: sleep 1
+      - name: Wait 120 sec to keep tunnel open
+        run: sleep 120
 
       - name: Show SSH auth logs (second to last)
         if: always()  # run even if previous steps fail
