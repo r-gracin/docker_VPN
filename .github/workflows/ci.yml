@@ -35,3 +35,17 @@ jobs:
 
       - name: Run ngrok version
         run: ngrok version
+
+      - name: Configure ngrok authtoken
+        run: ngrok config add-authtoken ${{ secrets.NGROK_TOKEN }}
+
+      - name: Start ngrok TCP tunnel for SSH in background
+        run: |
+          nohup ngrok tcp 22 --log=stdout > ngrok.log 2>&1 &
+          sleep 5
+          curl --silent http://127.0.0.1:4040/api/tunnels | jq '.tunnels[0].public_url'
+
+      - name: Wait 5 minutes to keep tunnel open
+        run: sleep 300
+        
+
