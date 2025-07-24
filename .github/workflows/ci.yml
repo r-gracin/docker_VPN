@@ -70,7 +70,7 @@ jobs:
       - name: Create server config
         run: |
           cat > /home/runner/openvpn-ca/server.conf <<EOF
-          port 1194
+          port 443
           proto tcp
           dev tun
           ca /home/runner/openvpn-ca/pki/ca.crt
@@ -97,7 +97,7 @@ jobs:
           NGROK_TOKEN: ${{ secrets.NGROK_TOKEN }}
         run: |
           ngrok authtoken $NGROK_TOKEN
-          ngrok tcp 1194 --log=stdout > ngrok.log 2>&1 &
+          ngrok tcp 443 --log=stdout > ngrok.log 2>&1 &
           sleep 10
           NGROK_TUNNEL=$(grep -oP 'tcp://\K[^ ]+' ngrok.log | head -1)
           echo "NGROK_TUNNEL=$NGROK_TUNNEL" >> $GITHUB_ENV
