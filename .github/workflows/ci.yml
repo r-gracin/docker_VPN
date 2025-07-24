@@ -1,0 +1,13 @@
+# .github/workflows/ip-info.yml
+name: Run ip a
+
+on:
+  workflow_dispatch:  # lets you trigger it manually from GitHub UI
+
+jobs:
+  show-ip:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Show IP address info
+        run: ip a

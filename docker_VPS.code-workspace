@@ -1,0 +1,13 @@
+{
+  "folders": [
+    {
+      "name": "Workflows",
+      "path": "./.github/workflows"
+    },
+    {
+      "name": "Root",
+      "path": "."
+    }
+  ],
+  "settings": {}
+}
