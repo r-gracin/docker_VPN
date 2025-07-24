@@ -94,9 +94,9 @@ jobs:
 
       - name: Start ngrok TCP tunnel
         env:
-          NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
+          NGROK_TOKEN: ${{ secrets.NGROK_TOKEN }}
         run: |
-          ngrok authtoken $NGROK_AUTHTOKEN
+          ngrok authtoken $NGROK_TOKEN
           ngrok tcp 1194 --log=stdout > ngrok.log 2>&1 &
           sleep 10
           NGROK_TUNNEL=$(grep -oP 'tcp://\K[^ ]+' ngrok.log | head -1)
