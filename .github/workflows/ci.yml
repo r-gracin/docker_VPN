@@ -57,8 +57,8 @@ jobs:
 
       - name: Setup EasyRSA PKI
         run: |
-          make-cadir ~/openvpn-ca
-          cd ~/openvpn-ca
+          make-cadir /home/runner/openvpn-ca
+          cd /home/runner/openvpn-ca
           echo 'set_var EASYRSA_REQ_CN "OpenVPN CA"' > vars
           ./easyrsa init-pki
           echo | ./easyrsa build-ca nopass
@@ -69,15 +69,15 @@ jobs:
 
       - name: Create server config
         run: |
-          cat > ~/openvpn-ca/server.conf <<EOF
+          cat > /home/runner/openvpn-ca/server.conf <<EOF
           port 1194
           proto tcp
           dev tun
-          ca ~/openvpn-ca/pki/ca.crt
-          cert ~/openvpn-ca/pki/issued/server.crt
-          key ~/openvpn-ca/pki/private/server.key
-          dh ~/openvpn-ca/pki/dh.pem
-          tls-auth ~/openvpn-ca/ta.key 0
+          ca /home/runner/openvpn-ca/pki/ca.crt
+          cert /home/runner/openvpn-ca/pki/issued/server.crt
+          key /home/runner/openvpn-ca/pki/private/server.key
+          dh /home/runner/openvpn-ca/pki/dh.pem
+          tls-auth /home/runner/openvpn-ca/ta.key 0
           cipher AES-256-CBC
           auth SHA256
           server 10.8.0.0 255.255.255.0
@@ -115,7 +115,7 @@ jobs:
       
       - name: Generate client config
         run: |
-          CLIENT_CONFIG=~/openvpn-ca/client1.ovpn
+          CLIENT_CONFIG=/home/runner/openvpn-ca/client1.ovpn
           cat > $CLIENT_CONFIG <<EOF
           client
           dev tun
@@ -131,16 +131,16 @@ jobs:
           key-direction 1
 
           <ca>
-          $(cat ~/openvpn-ca/pki/ca.crt)
+          $(cat /home/runner/openvpn-ca/pki/ca.crt)
           </ca>
           <cert>
-          $(sed -n '/BEGIN CERTIFICATE/,/END CERTIFICATE/p' ~/openvpn-ca/pki/issued/client1.crt)
+          $(sed -n '/BEGIN CERTIFICATE/,/END CERTIFICATE/p' /home/runner/openvpn-ca/pki/issued/client1.crt)
           </cert>
           <key>
-          $(cat ~/openvpn-ca/pki/private/client1.key)
+          $(cat /home/runner/openvpn-ca/pki/private/client1.key)
           </key>
           <tls-auth>
-          $(cat ~/openvpn-ca/ta.key)
+          $(cat /home/runner/openvpn-ca/ta.key)
           </tls-auth>
           EOF
 
@@ -148,7 +148,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: openvpn-client-config
-          path: ~/openvpn-ca/client1.ovpn
+          path: /home/runner/openvpn-ca/client1.ovpn
 
       - name: Wait 120 sec to keep tunnel open
         run: sleep 120
