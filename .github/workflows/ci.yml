@@ -42,15 +42,15 @@ jobs:
           sudo mkdir -p /var/run/sshd
 
       - name: Set root password
-        run: echo "root:githubactions" | sudo chpasswd
+        run: echo "root:simple1pass" | sudo chpasswd
 
       - name: Allow root login with password
         run: |
           sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
           sudo sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
       
-      - name: Start SSH server
-        run: sudo /usr/sbin/sshd
+      #- name: Start SSH server
+      # run: sudo /usr/sbin/sshd
 
       - name: Check sshd status
         run: ps aux | grep sshd
