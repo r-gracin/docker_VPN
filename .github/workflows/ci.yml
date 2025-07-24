@@ -70,8 +70,18 @@ jobs:
           sleep 5
           curl --silent http://127.0.0.1:4040/api/tunnels | jq '.tunnels[0].public_url'
 
-      - name: Wait 2 minutes to keep tunnel open
-        run: sleep 125
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
+
+      - name: Show current user
+        run: whoami
+        
+      - name: Verify root password login via ssh localhost
+        run: |
+          echo "simple1pass" | sshpass ssh -o StrictHostKeyChecking=no root@localhost 'echo SSH login successful'
+
+      - name: Wait 1 sec to keep tunnel open
+        run: sleep 1
 
       - name: Show SSH auth logs (second to last)
         if: always()  # run even if previous steps fail
