@@ -72,5 +72,9 @@ jobs:
 
       - name: Wait 2 minutes to keep tunnel open
         run: sleep 125
+
+      - name: Show SSH auth logs (second to last)
+        if: always()  # run even if previous steps fail
+        run: sudo tail -n 20 /var/log/auth.log
         
 
