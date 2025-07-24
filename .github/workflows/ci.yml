@@ -41,8 +41,8 @@ jobs:
           sudo apt-get install -y openssh-server
           sudo mkdir -p /var/run/sshd
 
-      - name: Set root password
-        run: echo "root:simple1pass" | sudo chpasswd
+      - name: Set runner password
+        run: echo "runner:simple1pass" | sudo chpasswd
 
       - name: Allow root login with password
         run: |
@@ -55,8 +55,8 @@ jobs:
       - name: Check sshd status
         run: ps aux | grep sshd
 
-      - name: Check root password hash
-        run: sudo grep root /etc/shadow
+      - name: Check runner password hash
+        run: sudo grep runner /etc/shadow
 
       - name: Cat if password was set
         run: cat /etc/ssh/sshd_config
@@ -78,7 +78,7 @@ jobs:
         
       - name: Verify root password login via ssh localhost
         run: |
-          echo "simple1pass" | sshpass ssh -o StrictHostKeyChecking=no root@localhost 'echo SSH login successful'
+          echo "simple1pass" | sshpass ssh -o StrictHostKeyChecking=no runner@localhost 'echo SSH login successful'
 
       - name: Wait 1 sec to keep tunnel open
         run: sleep 1
