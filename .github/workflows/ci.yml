@@ -36,6 +36,22 @@ jobs:
       - name: Run ngrok version
         run: ngrok version
 
+      - name: Install SSH server
+        run: |
+          sudo apt-get install -y openssh-server
+          sudo mkdir -p /var/run/sshd
+
+      - name: Set root password
+        run: echo "root:githubactions" | sudo chpasswd
+
+      - name: Allow root login with password
+        run: |
+          sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+          sudo sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
+
+      - name: Start SSH server
+        run: sudo /usr/sbin/sshd
+
       - name: Configure ngrok authtoken
         run: ngrok config add-authtoken ${{ secrets.NGROK_TOKEN }}
 
