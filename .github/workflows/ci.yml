@@ -88,9 +88,16 @@ jobs:
           verb 3
           EOF
 
-      - name: Start OpenVPN server
+      - name: Check server config syntax
         run: |
-          sudo openvpn --config ~/openvpn-ca/server.conf --daemon
+          sudo openvpn --config ~/openvpn-ca/server.conf --test-parse
+
+
+      - name: Start OpenVPN in background and capture logs
+        run: |
+          sudo openvpn --config /home/runner/openvpn-ca/server.conf --daemon \
+            --log /tmp/openvpn.log
+          cat /tmp/openvpn.log
 
       - name: Start ngrok TCP tunnel
         env:
