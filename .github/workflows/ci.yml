@@ -143,6 +143,6 @@ jobs:
           name: openvpn-client-config
           path: /home/runner/openvpn-ca/client1.ovpn
 
-      - name: Wait 120 sec to keep tunnel open
-        run: sleep 120
+      - name: Wait 350 sec to keep tunnel open
+        run: sleep 350
 
