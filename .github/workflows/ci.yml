@@ -88,10 +88,10 @@ jobs:
           verb 3
           EOF
 
-      - name: Check server config syntax
+      - name: Start OpenVPN in foreground
         run: |
-          sudo openvpn --config ~/openvpn-ca/server.conf --test-parse
-
+          sudo openvpn --config /home/runner/openvpn-ca/server.conf
+          sleep 20
 
       - name: Start OpenVPN in background and capture logs
         run: |
