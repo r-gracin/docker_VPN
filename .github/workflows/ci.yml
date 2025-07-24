@@ -1,5 +1,5 @@
 # .github/workflows/ip-info.yml
-name: Run ip a
+name: Run ngrok version
 
 on:
   workflow_dispatch:  # lets you trigger it manually from GitHub UI
@@ -11,3 +11,27 @@ jobs:
     steps:
       - name: Show IP address info
         run: ip a
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up ngrok cache
+        id: ngrok-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/bin/ngrok
+          key: ngrok-bin-v3
+
+      - name: Download ngrok if not cached
+        if: steps.ngrok-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/.local/bin
+          curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | sudo tee /etc/apt/trusted.gpg.d/ngrok.asc >/dev/null
+          echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | sudo tee /etc/apt/sources.list.d/ngrok.list
+          sudo apt update && sudo apt install ngrok
+          cp $(which ngrok) ~/.local/bin/ngrok
+
+      - name: Add ngrok to PATH
+        run: echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Run ngrok version
+        run: ngrok version
