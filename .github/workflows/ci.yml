@@ -138,7 +138,7 @@ jobs:
           EOF
 
       - name: Upload client config as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: openvpn-client-config
           path: ~/openvpn-ca/client1.ovpn
