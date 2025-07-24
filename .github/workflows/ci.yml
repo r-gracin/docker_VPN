@@ -48,9 +48,18 @@ jobs:
         run: |
           sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
           sudo sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
-
+      
       - name: Start SSH server
         run: sudo /usr/sbin/sshd
+
+      - name: Check sshd status
+        run: ps aux | grep sshd
+
+      - name: Check root password hash
+        run: sudo grep root /etc/shadow
+
+      - name: Cat if password was set
+        run: cat /etc/ssh/sshd_config
 
       - name: Configure ngrok authtoken
         run: ngrok config add-authtoken ${{ secrets.NGROK_TOKEN }}
@@ -61,7 +70,7 @@ jobs:
           sleep 5
           curl --silent http://127.0.0.1:4040/api/tunnels | jq '.tunnels[0].public_url'
 
-      - name: Wait 5 minutes to keep tunnel open
-        run: sleep 300
+      - name: Wait 2 minutes to keep tunnel open
+        run: sleep 125
         
 
