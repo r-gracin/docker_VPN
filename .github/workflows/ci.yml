@@ -51,20 +51,97 @@ jobs:
           sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
           sudo sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
-      - name: Configure ngrok authtoken
-        run: ngrok config add-authtoken ${{ secrets.NGROK_TOKEN }}
-
-      - name: Start ngrok TCP tunnel for SSH in background
+      - name: Install OpenVPN
         run: |
-          nohup ngrok tcp 22 --log=stdout > ngrok.log 2>&1 &
-          sleep 5
-          curl --silent http://127.0.0.1:4040/api/tunnels | jq '.tunnels[0].public_url'
+          sudo apt-get install -y openvpn easy-rsa wget unzip
+
+      - name: Setup EasyRSA PKI
+        run: |
+          make-cadir ~/openvpn-ca
+          cd ~/openvpn-ca
+          echo 'set_var EASYRSA_REQ_CN "OpenVPN CA"' > vars
+          ./easyrsa init-pki
+          echo | ./easyrsa build-ca nopass
+          ./easyrsa gen-dh
+          ./easyrsa build-server-full server nopass
+          ./easyrsa build-client-full client1 nopass
+          openvpn --genkey --secret ta.key
+
+      - name: Create server config
+        run: |
+          cat > ~/openvpn-ca/server.conf <<EOF
+          port 1194
+          proto tcp
+          dev tun
+          ca ~/openvpn-ca/pki/ca.crt
+          cert ~/openvpn-ca/pki/issued/server.crt
+          key ~/openvpn-ca/pki/private/server.key
+          dh ~/openvpn-ca/pki/dh.pem
+          tls-auth ~/openvpn-ca/ta.key 0
+          cipher AES-256-CBC
+          auth SHA256
+          server 10.8.0.0 255.255.255.0
+          keepalive 10 120
+          persist-key
+          persist-tun
+          status openvpn-status.log
+          verb 3
+          EOF
+
+      - name: Start OpenVPN server
+        run: |
+          sudo openvpn --config ~/openvpn-ca/server.conf --daemon
+
+      - name: Start ngrok TCP tunnel
+        env:
+          NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
+        run: |
+          ngrok authtoken $NGROK_AUTHTOKEN
+          ngrok tcp 1194 --log=stdout > ngrok.log 2>&1 &
+          sleep 10
+          NGROK_TUNNEL=$(grep -oP 'tcp://\K[^ ]+' ngrok.log | head -1)
+          echo "NGROK_TUNNEL=$NGROK_TUNNEL" >> $GITHUB_ENV
+
+      - name: Show ngrok tunnel address
+        run: echo "OpenVPN is exposed at TCP address: ${{ env.NGROK_TUNNEL }}"
+      
+      - name: Generate client config
+        run: |
+          CLIENT_CONFIG=~/openvpn-ca/client1.ovpn
+          cat > $CLIENT_CONFIG <<EOF
+          client
+          dev tun
+          proto tcp
+          remote ${{ env.NGROK_TUNNEL }}
+          resolv-retry infinite
+          nobind
+          persist-key
+          persist-tun
+          remote-cert-tls server
+          cipher AES-256-CBC
+          auth SHA256
+          key-direction 1
+
+          <ca>
+          $(cat ~/openvpn-ca/pki/ca.crt)
+          </ca>
+          <cert>
+          $(sed -n '/BEGIN CERTIFICATE/,/END CERTIFICATE/p' ~/openvpn-ca/pki/issued/client1.crt)
+          </cert>
+          <key>
+          $(cat ~/openvpn-ca/pki/private/client1.key)
+          </key>
+          <tls-auth>
+          $(cat ~/openvpn-ca/ta.key)
+          </tls-auth>
+          EOF
+
+      - name: Upload client config as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: openvpn-client-config
+          path: ~/openvpn-ca/client1.ovpn
 
       - name: Wait 120 sec to keep tunnel open
         run: sleep 120
-
-      - name: Show SSH auth logs (second to last)
-        if: always()  # run even if previous steps fail
-        run: sudo tail -n 20 /var/log/auth.log
-        
 
