@@ -113,7 +113,7 @@ jobs:
           client
           dev tun
           proto tcp
-          remote ${{ env.NGROK_TUNNEL }}
+          remote ${{ env.NGROK_TUNNEL//:/ }}
           resolv-retry infinite
           nobind
           persist-key
