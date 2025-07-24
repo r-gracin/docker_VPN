@@ -103,7 +103,8 @@ jobs:
           echo "NGROK_TUNNEL=$NGROK_TUNNEL" >> $GITHUB_ENV
 
       - name: Show ngrok tunnel address
-        run: echo "OpenVPN is exposed at TCP address: ${{ env.NGROK_TUNNEL }}"
+        run: |
+          echo "OpenVPN is exposed at TCP address: $NGROK_TUNNEL"
       
       - name: Generate client config
         run: |
