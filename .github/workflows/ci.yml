@@ -88,16 +88,9 @@ jobs:
           verb 3
           EOF
 
-      - name: Start OpenVPN in foreground
-        run: |
-          sudo openvpn --config /home/runner/openvpn-ca/server.conf
-          sleep 20
-
       - name: Start OpenVPN in background and capture logs
         run: |
-          sudo openvpn --config /home/runner/openvpn-ca/server.conf --daemon \
-            --log /tmp/openvpn.log
-          cat /tmp/openvpn.log
+          sudo openvpn --config /home/runner/openvpn-ca/server.conf --daemon
 
       - name: Start ngrok TCP tunnel
         env:
